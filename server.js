@@ -1,42 +1,53 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import dbEngine from './dbengine';
+import cors from 'cors';
 // import dbfParser from './dbfparser';
 
 const app = express();
 
-const path = __dirname + '../first/first-app/src/';
+const path = __dirname + '../qs/src';
 
 app.use(express.static(path));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(cors({ origin: 'http://localhost:4200' }));
+
+// app.use((rec, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+//   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+//   res.setHeader('Access-Control-Allow-Credentials', true);
+
+//     next();
+
+// });
 
 app.get('/api/users', (rec, res) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  dbEngine.getAllUsers((err, rec) => {
-    if (!err) return res.json(rec);
-  });
+	dbEngine.getAllUsers((err, rec) => {
+		if (!err) return res.json(rec);
+	});
 });
 
-app.get('/api/users/:id', (req, res)=>{
-  dbEngine.getUserById(req.params.id, (err, rec) =>{
-    if(!err) return res.json(rec);
-  })
+app.get('/api/users/:id', (req, res) => {
+	dbEngine.getUserById(req.params.id, (err, rec) => {
+		if (!err) return res.json(rec);
+	});
 });
 
-app.post('/api/users', (req, res)=>{
-  dbEngine.createUser(req.body.id, req.body.name, req.body.pass, req.body.comment, err=>{
-    if(err) throw err;
-    res.send('Insert new user');
-  })
+app.post('/api/users', (req, res) => {
+	dbEngine.createUser(req.body.login, req.body.pass, req.body.comment, (err) => {
+		if (err) throw err;
+		res.send('Insert new user');
+	});
 });
 
-app.put('/api/users/:id', (req, res)=>{
-  dbEngine.updateUser(req.body.id, req.body.name, req.body.pass, req.body.comment, err=>{
-    if(err) throw err;
-    res.send(`Update user {$req.body.id}`);
-  })
+app.put('/api/users/:id', (req, res) => {
+	dbEngine.updateUser(req.body.id, req.body.login, req.body.pass, req.body.comment, (err) => {
+		if (err) throw err;
+		res.send(`Update user {$req.body.id}`);
+	});
 });
 
 // app.post('/api/signin', (req, res) => {
@@ -61,6 +72,6 @@ app.put('/api/users/:id', (req, res)=>{
 // });
 
 const server = app.listen(3000, () => {
-  const { address, port } = server.address();
-  console.log(`Listening at http://localhost:${port}`);
+	const { address, port } = server.address();
+	console.log(`Listening at http://localhost:${port}`);
 });
