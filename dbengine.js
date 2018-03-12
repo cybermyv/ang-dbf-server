@@ -17,7 +17,7 @@ exports.getAllUsers = (callback) => {
 
 exports.getUserById = (id, callback) => {
 	let tQ = 'select * from users where id = ?';
-	db.each(tQ, [ name ], (err, row) => {
+	db.each(tQ, [ id ], (err, row) => {
 		if (!err) {
 			callback(null, row);
 		}
@@ -35,7 +35,8 @@ exports.createUser  = function (login, pass, comment, callback) {
 };
 
 exports.deleteUser = (id, callback) => {
-	let tQ = 'delete from users where id =?';
+	let tQ = 'delete from users where id = ?';
+	console.log('del', id);
 	db.run(tQ, [ id ], (err) => {
 		if (!err) callback(null);
 	});

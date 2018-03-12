@@ -50,6 +50,14 @@ app.put('/api/users/:id', (req, res) => {
 	});
 });
 
+app.delete('/api/users/:id', (req, res)=>{
+  console.log(req.params.id);
+  dbEngine.deleteUser(req.params.id, err=>{
+    if(err) throw err;
+    res.send(`Delete user ${req.params.id}`);
+  })
+});
+
 // app.post('/api/signin', (req, res) => {
 //   dbEngine.validationSigIn(req.body.username, req.body.password,
 //     (err, rec) => {
