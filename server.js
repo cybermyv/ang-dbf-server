@@ -43,20 +43,38 @@ app.post('/api/users', (req, res) => {
 	});
 });
 
-app.put('/api/users/:id', (req, res) => {
-	dbEngine.updateUser(req.body.id, req.body.login, req.body.pass, req.body.comment, (err) => {
-		if (err) throw err;
-		res.send(`Update user {$req.body.id}`);
+app.put('/api/users', (req, res) => {
+	dbEngine.updateUser( req.body.login, req.body.pass, req.body.comment, req.body.id, (err) => {
+		
+		res.send(`Update user ${req.body.id}`);
 	});
 });
 
-app.delete('/api/users/:id', (req, res)=>{
-  console.log(req.params.id);
-  dbEngine.deleteUser(req.params.id, err=>{
-    if(err) throw err;
-    res.send(`Delete user ${req.params.id}`);
-  })
+
+app.delete('/api/users/:id', (req, res) => {
+	console.log(req.params.id);
+	dbEngine.deleteUser(req.params.id, err => {
+		if (err) throw err;
+		res.send(`Delete user ${req.params.id}`);
+	})
 });
+
+//-- галерея
+app.get('/api/gallery', (req, res)=>{
+	dbEngine.getAllImages((err, rec)=>{
+		if(!err) return res.json(rec);
+		// res.send(`<img src="${rec.image}">`);
+	})
+});
+
+app.post('/api/gallery',(req, res)=>{
+	dbEngine.insertImage(req.body.image_name, req.body.image_name, err=>{
+		if (err) throw err;
+		res.send(`<img src="${req.body.image_name}">`);
+	})
+})
+
+//----------------------------
 
 // app.post('/api/signin', (req, res) => {
 //   dbEngine.validationSigIn(req.body.username, req.body.password,
