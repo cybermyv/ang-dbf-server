@@ -64,13 +64,13 @@ exports.getAllImages=(callback)=>{
 
 //-- японский способ
 
-exports.insertImage = (image_name, image_data, callback)=>{
+exports.insertImage = (image_data, callback)=>{
 	
 	console.log(image_data);
 
 	db.serialize(()=>{
-		const stmp = db.prepare('insert into images (name, image) values (?, ?)');
-		stmp.run(image_name, image_data);
+		const stmp = db.prepare('insert into images (name, image) values ("test", ?)');
+		stmp.run(image_data);
 		stmp.finalize();
 	})
 };

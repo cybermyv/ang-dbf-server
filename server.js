@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import dbEngine from './dbengine';
 import cors from 'cors';
+import multer from 'multer';
 // import dbfParser from './dbfparser';
 
 const app = express();
@@ -13,6 +14,19 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors({ origin: 'http://localhost:4200' }));
+
+const storage = multer.diskStorage({
+	destination: (req, file, callback)=>{
+		callback(null, './uploads/')
+	},
+	filename:(req, file, callback)=>{
+		callback(null, file.originalname)
+	}
+})
+
+const upload = multer({storage: storage});
+
+
 
 // app.use((rec, res, next) => {
 //   res.header("Access-Control-Allow-Origin", "*");
@@ -67,11 +81,16 @@ app.get('/api/gallery', (req, res)=>{
 	})
 });
 
-app.post('/api/gallery',(req, res)=>{
-	dbEngine.insertImage(req.body.image_name, req.body.image_name, err=>{
-		if (err) throw err;
-		res.send(`<img src="${req.body.image_name}">`);
-	})
+// app.post('/api/gallery',(req, res)=>{
+// 	dbEngine.insertImage(req.body.image_data, err=>{
+// 		if (err) throw err;
+// 		res.send(`<img src="${req.body.image_data}">`);
+// 	})
+// })
+
+app.post('/api/upload', upload.array('uploads[]', 12),(req, res)=>{
+	console.log('files', req.files);
+	res.send(req.files);
 })
 
 //----------------------------
