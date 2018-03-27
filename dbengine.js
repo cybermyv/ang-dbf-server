@@ -55,25 +55,24 @@ exports.getAllImages=(callback)=>{
 	db.all(tQ, callback);
 }
 
-// exports.storeImageInDb = (image_name, image_data, callback)=>{
-// 	let tQ = 'insert into images (name, image) values (?, ?)';
-// 	db.run(tQ, [image_name, image_data], (err)=>{
-// 		if (!err) callback(null);
-// 	})
-// };
-
-//-- японский способ
-
-exports.insertImage = (image_data, callback)=>{
-	
-	console.log(image_data);
-
-	db.serialize(()=>{
-		const stmp = db.prepare('insert into images (name, image) values ("test", ?)');
-		stmp.run(image_data);
-		stmp.finalize();
+exports.insertImage = (image_name, image_data, callback)=>{
+	let tQ = 'insert into images (name, image) values (?, ?)';
+	db.run(tQ, [image_name, image_data], (err)=>{
+		if (!err) callback(null);
 	})
 };
+
+//-- японский способ - более понятный способ выше.
+
+// exports.insertImage = (image_data, callback)=>{
+// 	db.serialize(()=>{
+// 		const stmp = db.prepare('insert into images (name, image) values ("x", ?)');
+// 		stmp.run(image_data,(err)=>{
+// 			if (!err) callback(null);
+// 		});
+// 		stmp.finalize();
+// 	})
+// };
 
 exports.getImageById = (id, callback)=>{
 	db.serialize(()=>{

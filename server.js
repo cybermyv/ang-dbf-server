@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import dbEngine from './dbengine';
 import cors from 'cors';
 import multer from 'multer';
+import fs from 'fs';
 // import dbfParser from './dbfparser';
 
 const app = express();
@@ -16,15 +17,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: 'http://localhost:4200' }));
 
 const storage = multer.diskStorage({
-	destination: (req, file, callback)=>{
+	destination: (req, file, callback) => {
 		callback(null, './uploads/')
 	},
-	filename:(req, file, callback)=>{
+	filename: (req, file, callback) => {
 		callback(null, file.originalname)
 	}
 })
 
-const upload = multer({storage: storage});
+const upload = multer({ storage: storage });
 
 
 
@@ -58,8 +59,8 @@ app.post('/api/users', (req, res) => {
 });
 
 app.put('/api/users', (req, res) => {
-	dbEngine.updateUser( req.body.login, req.body.pass, req.body.comment, req.body.id, (err) => {
-		
+	dbEngine.updateUser(req.body.login, req.body.pass, req.body.comment, req.body.id, (err) => {
+
 		res.send(`Update user ${req.body.id}`);
 	});
 });
@@ -74,12 +75,32 @@ app.delete('/api/users/:id', (req, res) => {
 });
 
 //-- галерея
-app.get('/api/gallery', (req, res)=>{
-	dbEngine.getAllImages((err, rec)=>{
-		if(!err) return res.json(rec);
+app.get('/api/gallery', (req, res) => {
+	dbEngine.getAllImages((err, rec) => {
+		if (!err) return res.json(rec);
 		// res.send(`<img src="${rec.image}">`);
 	})
 });
+
+app.post('/api/upload', upload.array('uploads[]', 12), (req, res) => {
+	console.log('UPLOAD files ', req.files);
+	res.send(req.files);
+
+})
+
+//---insert to db
+
+app.post('/api/insert', upload.array('image', 12), (req, res) => {
+
+	let file = req.files[0];
+	fs.readFile(file.path, (err, data) => {
+		if (err) throw err;
+		dbEngine.insertImage(file.originalname, data, err => {
+			if (err) throw err;
+			res.send('Insert image - insert');
+		})
+	})
+})
 
 // app.post('/api/gallery',(req, res)=>{
 // 	dbEngine.insertImage(req.body.image_data, err=>{
@@ -88,10 +109,6 @@ app.get('/api/gallery', (req, res)=>{
 // 	})
 // })
 
-app.post('/api/upload', upload.array('uploads[]', 12),(req, res)=>{
-	console.log('files', req.files);
-	res.send(req.files);
-})
 
 //----------------------------
 
