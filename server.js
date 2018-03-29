@@ -102,12 +102,12 @@ app.post('/api/insert', upload.array('image', 12), (req, res) => {
 	})
 })
 
-// app.post('/api/gallery',(req, res)=>{
-// 	dbEngine.insertImage(req.body.image_data, err=>{
-// 		if (err) throw err;
-// 		res.send(`<img src="${req.body.image_data}">`);
-// 	})
-// })
+ app.post('/api/gallery',(req, res)=>{
+ 	dbEngine.insertImage(req.body.image_data, err=>{
+		if (err) throw err;
+ 		res.send(`<img src="${req.body.image_data}">`);
+ 	})
+ })
 
 
 //----------------------------
