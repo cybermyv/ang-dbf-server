@@ -55,9 +55,9 @@ exports.getAllImages=(callback)=>{
 	db.all(tQ, callback);
 }
 
-exports.insertImage = (image_name, image_data, callback)=>{
-	let tQ = 'insert into images (name, image) values (?, ?)';
-	db.run(tQ, [image_name, image_data], (err)=>{
+exports.insertImage = (image_name, image_type, image_data, callback)=>{
+	let tQ = 'insert into images (name, type, image) values (?, ?, ?)';
+	db.run(tQ, [image_name, image_type, image_data], (err)=>{
 		if (!err) callback(null);
 	})
 };

@@ -4,6 +4,7 @@ import dbEngine from './dbengine';
 import cors from 'cors';
 import multer from 'multer';
 import fs from 'fs';
+import mime from 'mime';
 // import dbfParser from './dbfparser';
 
 const app = express();
@@ -93,9 +94,15 @@ app.post('/api/upload', upload.array('uploads[]', 12), (req, res) => {
 app.post('/api/insert', upload.array('image', 12), (req, res) => {
 
 	let file = req.files[0];
-	fs.readFile(file.path, (err, data) => {
+
+	fs.readFile(file.path,'base64', (err, data) => {
 		if (err) throw err;
-		dbEngine.insertImage(file.originalname, data, err => {
+
+		let mimeType = mime.getType(file.path)
+
+		data = 'data:'+ mimeType+';base64,'+data;
+
+		dbEngine.insertImage(file.originalname, mimeType, data, err => {
 			if (err) throw err;
 			res.send('Insert image - insert');
 		})
