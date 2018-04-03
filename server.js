@@ -4,10 +4,20 @@ import dbEngine from './dbengine';
 import cors from 'cors';
 import multer from 'multer';
 import fs from 'fs';
-import mime from 'mime';
+
+import sharp from 'sharp';
+//import thumbnail from 'thumbnail';
+
+// import mime from 'mime';
+// import im from 'imagemagick';
+// import gm from 'gm';
+
+
 // import dbfParser from './dbfparser';
 
+
 const app = express();
+const appPath = __dirname;
 
 const path = __dirname + '../qs/src';
 
@@ -83,38 +93,89 @@ app.get('/api/gallery', (req, res) => {
 	})
 });
 
-app.post('/api/upload', upload.array('uploads[]', 12), (req, res) => {
-	console.log('UPLOAD files ', req.files);
-	res.send(req.files);
+// app.post('/api/upload', upload.array('uploads[]', 12), (req, res) => {
+// 	console.log('UPLOAD files ', req.files);
+// 	res.send(req.files);
 
-})
+// })
 
-//---insert to db
-
+//---insert to db - без миниатюры
 app.post('/api/insert', upload.array('image', 12), (req, res) => {
-
 	let file = req.files[0];
 
-	fs.readFile(file.path,'base64', (err, data) => {
+	
+	fs.readFile(file.path, 'base64', (err, data) => {
 		if (err) throw err;
+		//let mimeType = mime.getType(file.path)
+		let mimeType = file.mimetype;
 
-		let mimeType = mime.getType(file.path)
+		sharp(file.path)
+		.resize(50, 50)
+		.toFile('./uploads/thumb/_'+file.filename,
+	err=>{
+		console.log(err)
+	})
+		
+		// gm('222.jpg' )
+		// .options({imageMagick: true},{ appPath: appPath})
+		// .resize(50, 50)
+		// .drawText('Mironov')
+		// // .thumb(50,50,'/uploads/thumb/'+file.filename,75,function(err){
+		// // 	if(err) {console.log(err)} else {console.log('done resizing')}
+		// // });
 
-		data = 'data:'+ mimeType+';base64,'+data;
+		//  .write('./uploads/thumb/_img.jpg', (err)=>{
+		//  	if(err) {console.log(err)} else {console.log('done resizing')}	
+		//  })
 
+		// im.resize({
+		// 	srcPath: file.path,
+		// 	dstPath:'/uploads/thumb/'+file.filename,
+		// 	width: 50,
+		// 	height: 50
+		// }, err=>{
+		// 	if (err) console.log(err)
+		// })
+
+	
+		
+		data = 'data:' + mimeType + ';base64,' + data;
 		dbEngine.insertImage(file.originalname, mimeType, data, err => {
 			if (err) throw err;
 			res.send('Insert image - insert');
 		})
 	})
-})
+});
 
- app.post('/api/gallery',(req, res)=>{
- 	dbEngine.insertImage(req.body.image_data, err=>{
-		if (err) throw err;
- 		res.send(`<img src="${req.body.image_data}">`);
- 	})
- })
+//--- insert to db with tumbnail
+
+// app.post('/api/insert', upload.array('image', 12), (req, res)=>{
+// 	let inputDir = __dirname + '/uploads';
+// 	let outputDir = __dirname + '/uploads/thumb'
+	
+// 	let file = req.files[0];
+	
+// 	// gm(inputDir+'/'+file.filename)
+// 	// resize(50,50)
+// 	// write(outputDir+'/'+file.filename, err=> {if( err ) throw err;})
+
+// 	fs.readFile(file.path, (err, data)=>{
+// 		console.log('!!!',data);
+
+// 		gm(data, file.filename)
+// 		.resize(50, 50)
+// 		.write(outputDir+file.filename, err=>{
+// 			if (!err) console.log('done resize');
+// 		})
+// 	})
+// })
+
+//  app.post('/api/gallery',(req, res)=>{
+//  	dbEngine.insertImage(req.body.image_data, err=>{
+// 		if (err) throw err;
+//  		res.send(`<img src="${req.body.image_data}">`);
+//  	})
+//  })
 
 
 //----------------------------
