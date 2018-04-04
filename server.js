@@ -99,76 +99,98 @@ app.get('/api/gallery', (req, res) => {
 
 // })
 
-//---insert to db - без миниатюры
+//--- insert to db with tumbna
 app.post('/api/insert', upload.array('image', 12), (req, res) => {
 	let file = req.files[0];
-
-	
+	let lastId;
+	//-- читаем картинку
 	fs.readFile(file.path, 'base64', (err, data) => {
 		if (err) throw err;
-		//let mimeType = mime.getType(file.path)
+		//-- определяем ее тип
+		//-- TODO - если не картинка, то в миниатюру надо грузить что-то другое и не делать миниатюрку
 		let mimeType = file.mimetype;
-
+		//-- делаем обрезку файла и складываем во временную папку. 
 		sharp(file.path)
-		.resize(50, 50)
-		.toFile('./uploads/thumb/_'+file.filename,
-	err=>{
-		console.log(err)
-	})
-		
-		// gm('222.jpg' )
-		// .options({imageMagick: true},{ appPath: appPath})
-		// .resize(50, 50)
-		// .drawText('Mironov')
-		// // .thumb(50,50,'/uploads/thumb/'+file.filename,75,function(err){
-		// // 	if(err) {console.log(err)} else {console.log('done resizing')}
-		// // });
+			.resize(120, 120)
+			.toFile('./uploads/thumb/_' + file.filename,
+				err => {
+					if (!err) {
 
-		//  .write('./uploads/thumb/_img.jpg', (err)=>{
-		//  	if(err) {console.log(err)} else {console.log('done resizing')}	
-		//  })
+						console.log('Сохранили миниатюру');
 
-		// im.resize({
-		// 	srcPath: file.path,
-		// 	dstPath:'/uploads/thumb/'+file.filename,
-		// 	width: 50,
-		// 	height: 50
-		// }, err=>{
-		// 	if (err) console.log(err)
-		// })
+					} else {
+						console.log(err);
+					}
+					//-- TODO - нужно сохранить исходную картинку, получить ее ID и сохранить миниатюру в свою табличку
+				})
 
-	
-		
+		//-- Пока тут сохраняем исходную картинку
 		data = 'data:' + mimeType + ';base64,' + data;
-		dbEngine.insertImage(file.originalname, mimeType, data, err => {
-			if (err) throw err;
-			res.send('Insert image - insert');
+
+		// dbEngine.insertImage(file.originalname, mimeType, data, (err) => {
+		// 	if (err) throw err;
+		// 	res.send('Insert image - insert');
+		// });
+
+		function insertAsync(name, mime, data) {
+			return new Promise((resolve, reject) => {
+
+				dbEngine.insertImage(name, mime, data, (err) => {
+				    //res.end('insert end');
+					//	res.send('Insert image - insert');
+
+					if(!err) resolve(null)
+			// 		//dbEngine.insertImage(file.originalname, mimeType, data, (err) => {
+
+					// if (err) { throw reject(err) } else {
+					// 	console.log('Insert');
+					// //	resolve(null);
+					// }
+				});
+			})
+		};
+
+		function selectAsync() {
+			return new Promise((resolve, reject) => {
+
+				dbEngine.getImageByFileName((err, row) => {
+					// if (err !== null) reject(err);
+					// if (row) {
+					 	console.log('Select');
+					//	resolve(row)
+
+					//res.send(row);
+					//if(!err) resolve(row)
+				});
+			})
+		}
+
+		async function insertImg() {
+			await insertAsync(file.originalname, mimeType, data, err=>{});
+			
+			lastId = await selectAsync((err,row)=>{
+				
+				return row;
+			});
+
+			console.log('lastId', row);
+		
+		};
+
+
+		insertImg().then(data => {
+				console.log('async', data);
+			return callback(null);
+
 		})
+
+
 	})
+
+
 });
 
-//--- insert to db with tumbnail
 
-// app.post('/api/insert', upload.array('image', 12), (req, res)=>{
-// 	let inputDir = __dirname + '/uploads';
-// 	let outputDir = __dirname + '/uploads/thumb'
-	
-// 	let file = req.files[0];
-	
-// 	// gm(inputDir+'/'+file.filename)
-// 	// resize(50,50)
-// 	// write(outputDir+'/'+file.filename, err=> {if( err ) throw err;})
-
-// 	fs.readFile(file.path, (err, data)=>{
-// 		console.log('!!!',data);
-
-// 		gm(data, file.filename)
-// 		.resize(50, 50)
-// 		.write(outputDir+file.filename, err=>{
-// 			if (!err) console.log('done resize');
-// 		})
-// 	})
-// })
 
 //  app.post('/api/gallery',(req, res)=>{
 //  	dbEngine.insertImage(req.body.image_data, err=>{

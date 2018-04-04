@@ -50,18 +50,33 @@ exports.updateUser = (login, pass, comment, id, callback) => {
 	});
 };
 
-exports.getAllImages=(callback)=>{
+exports.getAllImages = (callback) => {
 	let tQ = 'select * from images';
 	db.all(tQ, callback);
 }
 
-exports.insertImage = (image_name, image_type, image_data, callback)=>{
-	let tQ = 'insert into images (name, type, image) values (?, ?, ?)';
-	db.run(tQ, [image_name, image_type, image_data], (err)=>{
-		if (!err) callback(null);
+exports.getImageByFileName = (callback) => {
+	let tQ = 'SELECT last_insert_rowid()';
+	db.each(tQ, (err, row) => {
+
+	//	console.log(row);
+		callback(row);
+
 	})
+}
+
+exports.insertImage = (image_name, image_type, image_data, callback) => {
+	let tQ = 'insert into images (name, type, image) values (?, ?, ?)';
+
+	db.run(tQ, [image_name, image_type, image_data], (err) => {
+		if (!err) {
+			callback(null);
+		}
+	});
+
 };
 
+ 
 //-- японский способ - более понятный способ выше.
 
 // exports.insertImage = (image_data, callback)=>{
@@ -74,8 +89,8 @@ exports.insertImage = (image_name, image_type, image_data, callback)=>{
 // 	})
 // };
 
-exports.getImageById = (id, callback)=>{
-	db.serialize(()=>{
+exports.getImageById = (id, callback) => {
+	db.serialize(() => {
 		const stmp = db.prepare('select * from images where id = ?');
 		stmp.get(id);
 		stmp.finalize();
