@@ -17,8 +17,10 @@ exports.getAllUsers = (callback) => {
 
 exports.getUserById = (id, callback) => {
 	let tQ = 'select * from users where id = ?';
+	
 	db.each(tQ, [id], (err, row) => {
 		if (!err) {
+			console.log('getUserById', row);
 			callback(null, row);
 		}
 	});
